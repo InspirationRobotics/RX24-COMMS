@@ -14,8 +14,8 @@ from typing import Any, Dict
 # A small helper class so each value can have a timestamp
 class DataObject:
 
-    def __init__(self, data = None, *, timeout = None):
-        self.set_data(data, timeout)
+    def __init__(self, data = None, *, timeout = None, timestamp = None):
+        self.set_data(data, timeout, timestamp)
 
     def __eq__(self, other: object) -> bool:
         return self.data == other.data
@@ -24,9 +24,11 @@ class DataObject:
         self.set_data(data)
         return self
 
-    def set_data(self, data, timeout = None):
+    def set_data(self, data, timeout = None, timestamp = None):
         self.data = data
-        self.timestamp = time.time()
+        self.timestamp = timestamp
+        if self.timestamp == None:
+            self.timestamp = time.time()
         self.timeout = timeout
 
     def get_data(self):
@@ -84,6 +86,13 @@ class Interface:
         if name in self.interface_local_data:
             del self.interface_local_data[name]
 
+    def __add__(self, other):
+        if isinstance(other, dict):
+            self.from_dict(other)
+        if isinstance(other, Interface):
+            self.from_interface(other)
+        return self
+
     def __getitem__(self, name: str) -> Any:
         return self.__getattr__(name)
     
@@ -118,10 +127,19 @@ class Interface:
         for key in data:
             self.interface_local_data[key] = DataObject(data[key], timeout = self.default_remove_time)
         self.interface_local_timestamp = time.time()
+
+    def from_dict_with_timestamps(self, data: Dict[str, tuple]):
+        for key in data:
+            self.interface_local_data[key] = DataObject(data[key][0], timeout = self.default_remove_time, timestamp = data[key][1])
+        self.interface_local_timestamp = time.time()
+
+    def from_interface(self, other):
+        self.from_dict_with_timestamps(other.to_dict_with_timestamps())
     
 if __name__ == '__main__':
     interface = Interface()
+    interfaceA = Interface()
     interface.a = 5
-    interface.b = 10
+    interfaceA.b = 10
     print(interface['a'])
-    print(interface)
+    print(interface + interfaceA)

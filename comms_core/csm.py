@@ -1,3 +1,4 @@
+from .data_interface import Interface
 
 class CustomSocketMessage:
 
@@ -12,7 +13,9 @@ class CustomSocketMessage:
         return CustomSocketMessage.encode(data)
 
     @staticmethod
-    def encode(data : dict) -> str:
+    def encode(data : dict | Interface) -> str:
+        if isinstance(data, Interface):
+            data = data.to_dict()
         message = ''
         for key in data.keys():
             build = f'{key}:{data[key]}<{type(data[key]).__name__}>'
@@ -73,7 +76,7 @@ class CustomSocketMessage:
 
 
     @staticmethod
-    def decode(message : str) -> dict:
+    def decode(message : str, *, as_interface = False) -> dict:
         data = {}
         message = message.split('*%*')
         for item in message:
@@ -81,4 +84,6 @@ class CustomSocketMessage:
                 continue
             key, value = CustomSocketMessage._process_message(item)
             data[key] = value
+        if as_interface:
+            data = Interface(data)
         return data
