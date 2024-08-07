@@ -20,6 +20,33 @@ class CustomSocketMessage:
         return message
     
     @staticmethod
+    def _process_tuple_or_list(data : str) -> tuple | list:
+        '''Sample data: [1, 2, 3]'''
+        # Remove the square brackets or parentheses
+        if data[0] == '(':
+            is_tuple = True
+        else:
+            is_tuple = False
+        data = data[1:-1]
+        # Split the values
+        data = data.split(', ')
+        # Convert the values to the correct type
+        for i in range(len(data)):
+            if data[i].isdigit():
+                data[i] = int(data[i])
+            elif '.' in data[i]:
+                data[i] = float(data[i])
+            elif data[i] == 'True':
+                data[i] = True
+            elif data[i] == 'False':
+                data[i] = False
+        # Return the data
+        if is_tuple:
+            data = tuple(data)
+        return data
+
+
+    @staticmethod
     def _process_message(data : str) -> tuple:
         '''Sample data: {key:value<type>}'''
         # Remove the curly braces
@@ -39,6 +66,8 @@ class CustomSocketMessage:
             value = str(value)
         elif value_type == 'bool':
             value = bool(value)
+        elif value_type == 'list' or value_type == 'tuple':
+            value = CustomSocketMessage._process_tuple_or_list(value)
         # Return the key and value
         return key, value
 

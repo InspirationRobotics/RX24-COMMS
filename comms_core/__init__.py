@@ -1,4 +1,5 @@
 from .logger import Logger
 from .server import Server
 from .client import Client
-from .custom_msg import CustomSocketMessage
+from .csm import CustomSocketMessage
+from .data_interface import Interface
