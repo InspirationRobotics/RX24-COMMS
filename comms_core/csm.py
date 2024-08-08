@@ -18,7 +18,10 @@ class CustomSocketMessage:
             data = data.to_dict()
         message = ''
         for key in data.keys():
-            build = f'{key}:{data[key]}<{type(data[key]).__name__}>'
+            if type(data[key]).__name__ == 'bytes':
+                build = f'{key}:{data[key].hex()}<{type(data[key]).__name__}>'
+            else:
+                build = f'{key}:{data[key]}<{type(data[key]).__name__}>'
             message += '{' + build + '}*%*'
         return message
     
@@ -69,6 +72,10 @@ class CustomSocketMessage:
             value = str(value)
         elif value_type == 'bool':
             value = bool(value)
+        elif value_type == 'NoneType':
+            value = None
+        elif value_type == 'bytes':
+            value = bytes.fromhex(value)
         elif value_type == 'list' or value_type == 'tuple':
             value = CustomSocketMessage._process_tuple_or_list(value)
         # Return the key and value

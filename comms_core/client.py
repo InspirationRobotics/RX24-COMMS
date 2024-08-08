@@ -34,17 +34,24 @@ class Client(Logger):
 
     def _init_connection(self):
         try:
-            self.client_socket.connect(self.server_address)
+            if self.client_socket.connect_ex(self.server_address) != 0:
+                raise ConnectionRefusedError
             self.init = True
             self.log(f'Connected to {self.server_address}')
             return True
         except socket.timeout:
+            return False
+        except ConnectionRefusedError:
+            self.warning(f'Connection refused by {self.server_address}')
+            return False
+        except Exception as e:
             return False
 
     def _run(self):
         while self.active:
             if not self.init:
                 if not self._init_connection():
+                    time.sleep(5)
                     continue
                 self.send(f'Client: {socket.gethostname()}')
             self.receive()
@@ -67,7 +74,7 @@ class Client(Logger):
     
     def _read_data(self):
         try:
-            data = self.client_socket.recv(1024).decode()
+            data = self.client_socket.recv(4096).decode()
         except socket.timeout:
             data = None
         except ConnectionResetError:

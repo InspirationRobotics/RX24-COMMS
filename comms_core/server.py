@@ -68,9 +68,9 @@ class Server(Logger):
             self._send_data(conn, addr)
             time.sleep(0.01)
 
-    def _read_data(self, conn, addr):
+    def _read_data(self, conn : socket.socket, addr):
         try:
-            data = conn.recv(1024).decode()
+            data = conn.recv(4096).decode()
             return data
         except socket.timeout:
             return None
@@ -80,13 +80,14 @@ class Server(Logger):
             return None
         
 
-    def _send_data(self, conn, addr):
+    def _send_data(self, conn : socket.socket, addr):
         with self.lock:
             if addr not in self.connections:
                 return
             with self.connections[addr]['send_lock']:
                 for data in self.connections[addr]['send_queue']:
                     try:
+                        data : str
                         conn.send(data.encode())
                         self.log(f'Sent: {data} to {addr}')
                     except ConnectionResetError:

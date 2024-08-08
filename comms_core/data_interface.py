@@ -143,3 +143,5 @@ if __name__ == '__main__':
     interfaceA.b = 10
     print(interface['a'])
     print(interface + interfaceA)
+    interface += interfaceA
+    # print(interface)
