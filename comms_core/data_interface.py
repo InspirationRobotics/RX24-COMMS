@@ -66,6 +66,9 @@ class Interface:
     def set_remove_time(self, key, remove_time):
         self.interface_local_data[key].timeout = remove_time
 
+    def get_timestamp(self):
+        return self.interface_local_timestamp
+
     def __setattr__(self, name: str, value: Any) -> None:
         if name in Interface.local_variables:
             return super().__setattr__(name, value)

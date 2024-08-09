@@ -62,9 +62,10 @@ class Server(Logger):
             if data:
                 self.log(f'Received: {data} from {addr}')
                 with self.lock:
-                    self.connections[addr]['data'] = data
-                    if self.connections[addr]['callback']:
-                        self.connections[addr]['callback'](data, addr)
+                    if "Client: " not in data:
+                        self.connections[addr]['data'] = data
+                        if self.connections[addr]['callback']:
+                            self.connections[addr]['callback'](data, addr)
             self._send_data(conn, addr)
             time.sleep(0.01)
 

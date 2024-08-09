@@ -14,9 +14,6 @@ class Client(Logger):
         self.server_address = (server_address, 37564)
         self.callback = callback
 
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.settimeout(0.05)
-
         self.conn = None
         self.address = None
         self.init = False
@@ -34,7 +31,10 @@ class Client(Logger):
 
     def _init_connection(self):
         try:
+            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.client_socket.settimeout(0.05)
             if self.client_socket.connect_ex(self.server_address) != 0:
+                self.client_socket.close()
                 raise ConnectionRefusedError
             self.init = True
             self.log(f'Connected to {self.server_address}')
