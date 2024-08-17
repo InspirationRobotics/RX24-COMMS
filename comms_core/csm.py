@@ -1,4 +1,5 @@
 from .data_interface import Interface
+from typing import Union
 
 class CustomSocketMessage:
 
@@ -13,7 +14,7 @@ class CustomSocketMessage:
         return CustomSocketMessage.encode(data)
 
     @staticmethod
-    def encode(data : dict | Interface) -> str:
+    def encode(data : Union[dict, Interface]) -> str:
         if isinstance(data, Interface):
             data = data.to_dict()
         message = ''
@@ -26,7 +27,7 @@ class CustomSocketMessage:
         return message
     
     @staticmethod
-    def _process_tuple_or_list(data : str) -> tuple | list:
+    def _process_tuple_or_list(data : str) -> Union[tuple, list]:
         '''Sample data: [1, 2, 3]'''
         # Remove the square brackets or parentheses
         if data[0] == '(':
