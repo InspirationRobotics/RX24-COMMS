@@ -9,7 +9,7 @@ class Server(Logger):
 
     def __init__(self, *, default_callback: Callable = None):
         super().__init__('Server')
-        self.local_server_address = (socket.gethostname(), 37564)
+        self.local_server_address = ('0.0.0.0', 37564)
         self.default_callback = default_callback
 
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
