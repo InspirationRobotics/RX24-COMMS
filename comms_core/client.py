@@ -108,6 +108,8 @@ class Client(Logger):
             self.log(f'Sent: {data} to {self.server_address}')
         except ConnectionResetError:
             self.init = False
+        except BrokenPipeError:
+            self.init = False
 
     def _send(self):
         if not self.init:

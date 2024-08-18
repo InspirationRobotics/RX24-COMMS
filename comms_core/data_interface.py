@@ -21,7 +21,8 @@ class DataObject:
         return self.data == other.data
 
     def __floordiv__(self, data):
-        self.set_data(data)
+        self.data = data
+        self.timestamp = time.time()
         return self
 
     def set_data(self, data, timeout = None, timestamp = None):
