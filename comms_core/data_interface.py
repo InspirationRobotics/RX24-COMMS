@@ -9,7 +9,7 @@
 # The class should also be able to convert itself into a dictionary
 
 import time
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 # A small helper class so each value can have a timestamp
 class DataObject:
@@ -40,7 +40,7 @@ class DataObject:
         return self.timestamp
     
     def __str__(self) -> str:
-        return f'Data: {self.data} | Timestamp: {self.timestamp}'
+        return f'Data: {self.data} | Timestamp: {self.timestamp} | Timeout: {self.timeout}'
     
     def __repr__(self) -> str:
         return str(self)
@@ -68,6 +68,11 @@ class Interface:
 
     def get_timestamp(self):
         return self.interface_local_timestamp
+
+    def get_data_object(self, name : str) -> Union[DataObject, None]:
+        if name not in self.interface_local_data:
+            return None
+        return self.interface_local_data[name]
 
     def __setattr__(self, name: str, value: Any) -> None:
         if name in Interface.local_variables:
@@ -128,12 +133,18 @@ class Interface:
     
     def from_dict(self, data: Dict[str, Any]):
         for key in data:
-            self.interface_local_data[key] = DataObject(data[key], timeout = self.default_remove_time)
+            if key in self.interface_local_data:
+                self.interface_local_data[key] // data[key]
+            else:
+                self.interface_local_data[key] = DataObject(data[key], timeout = self.default_remove_time)
         self.interface_local_timestamp = time.time()
 
     def from_dict_with_timestamps(self, data: Dict[str, tuple]):
         for key in data:
-            self.interface_local_data[key] = DataObject(data[key][0], timeout = self.default_remove_time, timestamp = data[key][1])
+            if key in self.interface_local_data:
+                self.interface_local_data[key] // data[key]
+            else:
+                self.interface_local_data[key] = DataObject(data[key][0], timeout = self.default_remove_time, timestamp = data[key][1])
         self.interface_local_timestamp = time.time()
 
     def from_interface(self, other):
@@ -141,10 +152,16 @@ class Interface:
     
 if __name__ == '__main__':
     interface = Interface()
-    interfaceA = Interface()
-    interface.a = 5
-    interfaceA.b = 10
-    print(interface['a'])
-    print(interface + interfaceA)
-    interface += interfaceA
+    interfaceA = Interface(default_remove_time=2)
+    interfaceA.set_mode = 1
+    interfaceA.set_remove_time("set_mode", None)
+    pretime = time.time()
+    while time.time() - pretime < 5:
+        print(interfaceA.set_mode)
+        time.sleep(0.1)
+    interfaceA.set_mode = 2
+    pretime = time.time()
+    while time.time() - pretime < 5:
+        print(interfaceA.set_mode)
+        time.sleep(0.1)
     # print(interface)
