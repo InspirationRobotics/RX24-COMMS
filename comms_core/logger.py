@@ -18,7 +18,7 @@ class Logger:
             # Create and configure the file handler
             log_directory = 'logs'
             os.makedirs(log_directory, exist_ok=True)
-            file_handler = logging.FileHandler(f'{log_directory}/{name}.log')
+            file_handler = logging.FileHandler(f'{log_directory}/{name}.log', mode="w")
             file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
             file_handler.setLevel(logging.DEBUG)  # Log all messages to the file
             self.logger.addHandler(file_handler)
