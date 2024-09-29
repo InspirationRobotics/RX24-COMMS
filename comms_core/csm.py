@@ -86,12 +86,15 @@ class CustomSocketMessage:
     @staticmethod
     def decode(message : str, *, as_interface = False) -> dict:
         data = {}
-        message = message.split('*%*')
-        for item in message:
-            if item == '':
-                continue
-            key, value = CustomSocketMessage._process_message(item)
-            data[key] = value
-        if as_interface:
-            data = Interface(data)
+        try:
+            message = message.split('*%*')
+            for item in message:
+                if item == '':
+                    continue
+                key, value = CustomSocketMessage._process_message(item)
+                data[key] = value
+            if as_interface:
+                data = Interface(data)
+        except:
+            pass
         return data
