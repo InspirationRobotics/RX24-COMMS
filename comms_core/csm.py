@@ -93,8 +93,10 @@ class CustomSocketMessage:
                     continue
                 key, value = CustomSocketMessage._process_message(item)
                 data[key] = value
-            if as_interface:
-                data = Interface(data)
         except:
             pass
+        if as_interface:
+                interface = Interface()
+                interface.from_dict(data)
+                return interface
         return data
