@@ -1,4 +1,4 @@
-from .data_interface import Interface
+from comms_core.data_interface import Interface
 from typing import Union
 
 class CustomSocketMessage:
@@ -26,6 +26,40 @@ class CustomSocketMessage:
             message += '{' + build + '}*%*'
         return message
     
+    @staticmethod
+    def _process_2D_list(data : str) -> Union[tuple, list]:
+        '''
+        Sample Data:
+        [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        [(1.0, 2.0, 3.0), (4.0, 5.0, 6.0), (7.0, 8.0, 9.0)]
+        [1, 2, 3]
+        (1.0, 2.0, 3.0)
+        '''
+        if data[1] not in ['[', '(']:
+            return CustomSocketMessage._process_tuple_or_list(data)
+        result = []
+        # Remove the square brackets
+        data = data[1:-1]
+        # Split the values
+        if data[0] == '(':
+            is_tuple = True
+        else:
+            is_tuple = False
+        if is_tuple:
+            data = data.split('), ')
+            # Add the closing parentheses back
+            for i in range(len(data)):
+                data[i] += ')' if data[i][-1] != ')' else ''
+        else:
+            data = data.split('], ')
+            # Add the closing brackets back
+            for i in range(len(data)):
+                data[i] += ']' if data[i][-1] != ']' else ''
+        # Convert the values to the correct type
+        for val in data:
+            result.append(CustomSocketMessage._process_tuple_or_list(val))
+        return result
+
     @staticmethod
     def _process_tuple_or_list(data : str) -> Union[tuple, list]:
         '''Sample data: [1, 2, 3]'''
@@ -78,7 +112,7 @@ class CustomSocketMessage:
         elif value_type == 'bytes':
             value = bytes.fromhex(value)
         elif value_type == 'list' or value_type == 'tuple':
-            value = CustomSocketMessage._process_tuple_or_list(value)
+            value = CustomSocketMessage._process_2D_list(value)
         # Return the key and value
         return key, value
 
@@ -100,3 +134,15 @@ class CustomSocketMessage:
                 interface.from_dict(data)
                 return interface
         return data
+    
+
+if __name__ == '__main__':
+    data = {
+        'key1': [(1.0, 2.0, 3.0), (4.0, 5.0, 6.0), (7.0, 8.0, 9.0)],
+        'key2': [[1,2,3], [4,5,6], [7,8,9]],
+        'key3': (1,0, 2.0),
+    }
+    message = CustomSocketMessage.encode(data)
+    print(message)
+    dec = CustomSocketMessage.decode(message)
+    print(dec)
