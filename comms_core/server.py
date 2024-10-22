@@ -1,6 +1,6 @@
 import time
 import socket
-from typing import List, Dict, Callable
+from typing import List, Dict, Callable, Union
 from threading import Thread, Lock
 
 from .logger import Logger
@@ -114,16 +114,22 @@ class Server(Logger):
                     continue
             self.connections.clear()
 
-    def send(self, data: str, addr = None):
+    def send(self, data: str, addr : Union[tuple, str] = None):
         if addr is None:
             with self.lock:
                 if len(self.connections) == 0:
                     return
                 addr = list(self.connections.keys())[0]
         with self.lock:
-            if addr in self.connections:
-                with self.connections[addr]['send_lock']:
-                    self.connections[addr]['send_queue'].append(data)
+            if isinstance(addr, tuple):
+                if addr in self.connections:
+                    with self.connections[addr]['send_lock']:
+                        self.connections[addr]['send_queue'].append(data)
+            if isinstance(addr, str):
+                for address, info in self.connections.items():
+                    if info['ip'] == addr:
+                        with self.connections[address]['send_lock']:
+                            self.connections[address]['send_queue'].append(data)
 
     def set_callback(self, addr, callback: Callable):
         with self.lock:
