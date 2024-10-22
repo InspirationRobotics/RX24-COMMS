@@ -7,11 +7,11 @@ from .logger import Logger
 
 class Client(Logger):
 
-    def __init__(self, server_address : str, *, callback = None):
+    def __init__(self, server_address : str, *, callback = None, port = 37564) -> None:
         super().__init__('Client')
         if server_address == 'debug':
             server_address = socket.gethostname()
-        self.server_address = (server_address, 37564)
+        self.server_address = (server_address, port)
         self.callback = callback
 
         self.conn = None
