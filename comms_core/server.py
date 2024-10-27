@@ -95,6 +95,8 @@ class Server(Logger):
                         with self.lock:
                             self._kill_client(addr)
                         break
+                    except BrokenPipeError:
+                        pass
                 self.connections[addr]['send_queue'] = []
 
     def start(self):
