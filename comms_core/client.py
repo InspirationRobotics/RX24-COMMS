@@ -7,12 +7,13 @@ from .logger import Logger
 
 class Client(Logger):
 
-    def __init__(self, server_address : str, *, callback = None, port = 37564) -> None:
+    def __init__(self, server_address : str, *, callback = None, port = 37564, TD=False) -> None:
         super().__init__('Client')
         if server_address == 'debug':
             server_address = socket.gethostname()
         self.server_address = (server_address, port)
         self.callback = callback
+        self.TD = TD
 
         self.conn = None
         self.address = None
@@ -53,7 +54,8 @@ class Client(Logger):
                 if not self._init_connection():
                     time.sleep(5)
                     continue
-                self.send(f'Client: {socket.gethostname()}')
+                if not self.TD:
+                    self.send(f'Client: {socket.gethostname()}')
             self.receive()
             self._send()
             time.sleep(0.01)
@@ -77,10 +79,11 @@ class Client(Logger):
             data = self.client_socket.recv(4096).decode()
         except socket.timeout:
             data = None
-        except ConnectionResetError:
+        except ConnectionResetError as e:
             data = None
             self.init = False
             self.warning(f'Lost connection to {self.server_address}')
+            self.warning(e)
         return data
 
     def receive(self):
